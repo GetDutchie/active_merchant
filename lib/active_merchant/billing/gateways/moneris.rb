@@ -331,7 +331,7 @@ module ActiveMerchant #:nodoc:
         return if xml.root.nil?
 
         xml.elements.each('//receipt/*') do |node|
-          response[node.name.underscore.to_sym] = normalize(node.text)
+          response[node.name.underscore.to_sym] = node.elements.count.zero? ? normalize(node.text) : hashify_children(node.elements)
         end
       end
 
@@ -440,6 +440,16 @@ module ActiveMerchant #:nodoc:
           'res_preauth_cc' => %i[data_key order_id cust_id amount crypt_type cof_info],
           'res_card_verification_cc' => %i[order_id data_key expdate crypt_type cof_info]
         }
+      end
+
+      private
+
+      def hashify_children(elements)
+        response = {}
+        elements.each do |node|
+          response[node.name.underscore.to_sym] = node.elements.count.zero? ? normalize(node.text) : hashify_children(node.elements)
+        end
+        response
       end
     end
   end
