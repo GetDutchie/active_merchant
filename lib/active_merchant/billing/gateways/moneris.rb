@@ -212,7 +212,11 @@ module ActiveMerchant #:nodoc:
             post[:pos_code] = '00'
             post[:track2] = payment_method.track_data
           else
-            post[:pan] = payment_method.number
+            if payment_method.respond_to?(:data_key)
+              post[:data_key] = payment_method.data_key
+            else
+              post[:pan] = payment_method.number
+            end
             post[:expdate] = expdate(payment_method)
             post[:cvd_value] = payment_method.verification_value if payment_method.verification_value?
             post[:cavv] = payment_method.payment_cryptogram if payment_method.is_a?(NetworkTokenizationCreditCard)
@@ -436,7 +440,7 @@ module ActiveMerchant #:nodoc:
           'res_temp_add' => %i[pan expdate crypt_type duration],
           'res_delete' => [:data_key],
           'res_update_cc' => %i[data_key pan expdate crypt_type avs_info cof_info],
-          'res_purchase_cc' => %i[data_key order_id cust_id amount crypt_type cof_info],
+          'res_purchase_cc' => %i[data_key order_id cust_id amount crypt_type cof_info expdate cvd_info avs_info],
           'res_preauth_cc' => %i[data_key order_id cust_id amount crypt_type cof_info],
           'res_card_verification_cc' => %i[order_id data_key expdate crypt_type cof_info]
         }
